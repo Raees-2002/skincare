@@ -16,4 +16,10 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          script: echo "hello from ec2"
+          script: |
+            cd ~/skincare
+            git fetch origin
+            git reset --hard origin/main
+            chmod +x scripts/deploy.sh
+            cd scripts
+            ./deploy.sh v$(date +%s)
