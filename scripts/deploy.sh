@@ -32,7 +32,9 @@ if curl -fs http://localhost:$TEST_PORT/health > /dev/null; then
   ln -sfn "$RELEASE_DIR" "$APP_DIR/current"
 
   echo "restarting service"
-  sudo systemctl restart skincare
+  
+  pm2 reload skincare || pm2 start src/server.js --name skincare
+
 
   echo "deployment successful"
 else
