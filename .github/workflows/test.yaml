@@ -15,7 +15,8 @@ jobs:
         with:
           node-version: 18
 
-      # build artifact
+      # build artifact for ec2
+      
       - name: install deps
         run: |
           cd backend
