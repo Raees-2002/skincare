@@ -16,7 +16,7 @@ jobs:
           node-version: 18
 
       # build artifact for ec2
-      
+
       - name: install deps
         run: |
           cd backend
@@ -25,7 +25,8 @@ jobs:
       - name: create artifact
         run: |
           cd backend
-          tar -czf app.tar.gz .
+          tar -czf ../app.tar.gz .
+
 
       # copy artifact to ec2  ⭐ IMPORTANT
       - name: copy artifact
