@@ -9,7 +9,7 @@ app.get("/", (_, res) => {
 });
 
 app.get("/health", (_, res) => {
-  res.status(200).json({ status: "current version is ok" });
+  res.status(200).json({ status: "current version 1 is ok" });
 });
 
 module.exports = app;
