@@ -1,0 +1,231 @@
+# skincare devops deployment project
+
+## overview
+
+this project demonstrates a complete end-to-end devops pipeline for deploying a node.js application on aws ec2 using modern production practices. the system automates build, packaging, deployment, health validation, and rollback to ensure safe and reliable releases without downtime.
+
+instead of manually ssh into servers and restarting services, the entire deployment is triggered automatically on every push to the main branch through github actions.
+
+the goal of this project is to simulate how real production systems deploy applications safely and consistently.
+
+---
+
+## problem statement
+
+traditional deployments usually involve:
+
+* manually logging into servers
+* running npm install
+* restarting processes
+* risking downtime or broken releases
+
+this approach is slow, error-prone, and unsafe.
+
+to solve this, the project implements:
+
+* automated ci cd pipeline
+* artifact-based deployments
+* health checks before traffic switch
+* automatic rollback on failure
+* zero downtime reloads
+
+---
+
+## architecture
+
+high level flow:
+
+developer push
+→ github actions builds artifact
+→ artifact copied to ec2
+→ deploy script runs
+→ health check validation
+→ symlink switch
+→ pm2 reload
+→ nginx serves traffic
+
+detailed architecture:
+
+browser
+↓
+nginx reverse proxy (port 80)
+↓
+pm2 managed node application (port 5000)
+↓
+/opt/app/current → active release
+↓
+/opt/app/releases/v1, v2, v3
+
+---
+
+## tech stack
+
+* node.js (backend api)
+* nginx (reverse proxy)
+* pm2 (process manager)
+* github actions (ci cd)
+* aws ec2 (hosting)
+* bash scripting (automation)
+
+---
+
+## features implemented
+
+* automated deployment on git push
+* artifact-based packaging in ci pipeline
+* versioned release directories
+* symbolic link switching for active version
+* health check endpoint validation
+* automatic rollback on failure
+* zero downtime deployments
+* pm2 auto restart on crash
+* pm2 auto start on reboot
+* environment variable configuration
+* nginx reverse proxy routing
+
+---
+
+## deployment strategy
+
+### step 1 — build artifact
+
+github actions installs dependencies and packages the application into a tar archive.
+
+### step 2 — copy artifact
+
+the artifact is securely transferred to the ec2 server.
+
+### step 3 — release creation
+
+deploy script extracts the artifact into a new versioned directory.
+
+example:
+
+```
+/opt/app/releases/v1770818599
+```
+
+### step 4 — health check
+
+the new version starts on a temporary port and the /health endpoint is validated.
+
+### step 5 — traffic switch
+
+if healthy, a symbolic link updates:
+
+```
+/opt/app/current → new version
+```
+
+### step 6 — reload
+
+pm2 reloads the app without downtime.
+
+### rollback behavior
+
+if health check fails:
+
+* new release is deleted
+* symlink remains unchanged
+* old version keeps running
+
+users never experience downtime.
+
+---
+
+## project structure
+
+```
+backend/                  application source code
+scripts/setup.sh          server provisioning script
+scripts/deploy.sh         deployment automation script
+.github/workflows/        ci cd pipeline
+```
+
+---
+
+## how to run locally
+
+```
+cd backend
+npm install
+npm start
+```
+
+app runs on:
+
+```
+http://localhost:5000
+```
+
+---
+
+## how to deploy
+
+push to main branch:
+
+```
+git push origin main
+```
+
+deployment happens automatically through github actions.
+
+---
+
+## verification commands (ec2)
+
+check active version:
+
+```
+readlink -f /opt/app/current
+```
+
+check health:
+
+```
+curl localhost:5000/health
+```
+
+check version:
+
+```
+curl localhost:5000/version
+```
+
+check process:
+
+```
+pm2 status
+```
+
+---
+
+## learning outcomes
+
+through this project i learned:
+
+* designing ci cd pipelines
+* implementing safe deployment strategies
+* using reverse proxies
+* managing node processes with pm2
+* automating infrastructure with shell scripts
+* implementing rollback and reliability patterns
+
+---
+
+## future improvements
+
+* https with letsencrypt
+* docker containerization
+* centralized logging
+* monitoring and alerts
+* blue green deployments
+
+---
+
+## author
+
+rafee
+
+```
+```
