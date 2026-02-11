@@ -8,9 +8,8 @@ app.get("/", (_, res) => {
   res.send("api running");
 });
 
-app.get('/health', (req, res) => {
-  res.status(500).send('fail');
+app.get("/health", (_, res) => {
+  res.status(200).json({ status: "current version is ok" });
 });
-
 
 module.exports = app;
