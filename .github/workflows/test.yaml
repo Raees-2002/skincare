@@ -1,25 +1,49 @@
-
-name: ssh-test
+name: deploy
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ssh into ec2
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # build artifact
+      - name: install deps
+        run: |
+          cd backend
+          npm ci
+
+      - name: create artifact
+        run: |
+          cd backend
+          tar -czf app.tar.gz .
+
+      # copy artifact to ec2  ⭐ IMPORTANT
+      - name: copy artifact
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          source: backend/app.tar.gz
+          target: /tmp/
+
+      # run deploy
+      - name: deploy on ec2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            cd ~/skincare
-            git fetch origin
-            git reset --hard origin/main
-            chmod +x scripts/deploy.sh
-            cd scripts
+            cd ~/skincare/scripts
+            chmod +x deploy.sh
             ./deploy.sh v$(date +%s)
