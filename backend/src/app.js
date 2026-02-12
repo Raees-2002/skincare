@@ -4,8 +4,10 @@ const app = express();
 
 app.use(express.json());
 
+
+
 app.get("/", (_, res) => {
-  res.send("api running");
+  res.send("api running, new deployment triggered!" );
 });
 
 app.get("/health", (_, res) => {
